@@ -61,3 +61,25 @@ struct ContentView: View {
     }
 }
 ```
+
+## Set image Filter
+
+```swift
+    func loadImage() {
+        let inputImage = UIImage(resource: .example)
+        let beginImage = CIImage(image: inputImage)
+        
+        let contexts = CIContext()
+        let currentFilter = CIFilter.sepiaTone()
+        
+        currentFilter.inputImage = beginImage
+        currentFilter.intensity = -5
+
+        guard let outputImage = currentFilter.outputImage else { return }
+        guard let cgImage = contexts.createCGImage(outputImage, from: outputImage.extent) else {
+            return
+        }
+        let iuImage = UIImage(cgImage: cgImage)
+        image = Image(uiImage: iuImage)
+    }
+```
