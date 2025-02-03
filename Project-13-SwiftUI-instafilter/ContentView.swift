@@ -12,6 +12,7 @@ import CoreImage.CIFilterBuiltins
 struct ContentView: View {
     
     @State private var image: Image?
+    @State private var sliderAmount = 1.0
     
     var body: some View {
         VStack {
@@ -19,18 +20,22 @@ struct ContentView: View {
                 .resizable()
                 .scaledToFit()
         }
+        Slider(value: $sliderAmount, in: -10...1)
         
         .onAppear(perform: loadImage)
+        .onChange(of: sliderAmount) {
+            loadImage()
+        }
     }
     func loadImage() {
         let inputImage = UIImage(resource: .example)
         let beginImage = CIImage(image: inputImage)
         
         let contexts = CIContext()
-        let currentFilter = CIFilter.pixellate()
+        let currentFilter = CIFilter.crystallize()
         currentFilter.inputImage = beginImage
         
-        let amount = 1.0
+        let amount = sliderAmount
         let inputKeys = currentFilter.inputKeys
         
 //        currentFilter.intensity = -5
