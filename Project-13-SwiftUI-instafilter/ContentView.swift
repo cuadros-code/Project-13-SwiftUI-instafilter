@@ -22,11 +22,12 @@ struct ContentView: View {
         }
         Slider(value: $sliderAmount, in: -10...1)
         
-        .onAppear(perform: loadImage)
-        .onChange(of: sliderAmount) {
-            loadImage()
-        }
+            .onAppear(perform: loadImage)
+            .onChange(of: sliderAmount) {
+                loadImage()
+            }
     }
+    
     func loadImage() {
         let inputImage = UIImage(resource: .example)
         let beginImage = CIImage(image: inputImage)
@@ -38,7 +39,7 @@ struct ContentView: View {
         let amount = sliderAmount
         let inputKeys = currentFilter.inputKeys
         
-//        currentFilter.intensity = -5
+        //        currentFilter.intensity = -5
         if inputKeys.contains(kCIInputIntensityKey) {
             currentFilter.setValue(amount, forKey: kCIInputIntensityKey)
         }
@@ -52,7 +53,7 @@ struct ContentView: View {
         }
         
         guard let outputImage = currentFilter.outputImage else { return }
-        guard let cgImage = contexts.createCGImage(outputImage, from: outputImage.extent) else {
+        guard let cgImage = contexts.createCGImage(outputImage, from: outputImage.extent)else {
             return
         }
         let iuImage = UIImage(cgImage: cgImage)
