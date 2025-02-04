@@ -6,58 +6,52 @@
 //
 
 import SwiftUI
-import CoreImage
-import CoreImage.CIFilterBuiltins
+import PhotosUI
 
 struct ContentView: View {
     
-    @State private var image: Image?
-    @State private var sliderAmount = 1.0
+    @State private var pickerItems = [PhotosPickerItem]()
+    @State private var selectedImage = [Image]()
     
     var body: some View {
         VStack {
-            image?
-                .resizable()
-                .scaledToFit()
-        }
-        Slider(value: $sliderAmount, in: -10...1)
-        
-            .onAppear(perform: loadImage)
-            .onChange(of: sliderAmount) {
-                loadImage()
+            PhotosPicker(
+                "Select a picture",
+                selection: $pickerItems,
+                maxSelectionCount: 3,
+                matching: .images
+            )
+            
+            PhotosPicker(
+                selection: $pickerItems,
+                maxSelectionCount: 3,
+                matching: .any(of: [.images, .not(.screenshots)])
+            ) {
+                Label("Select a picture", systemImage: "photo")
             }
-    }
-    
-    func loadImage() {
-        let inputImage = UIImage(resource: .example)
-        let beginImage = CIImage(image: inputImage)
-        
-        let contexts = CIContext()
-        let currentFilter = CIFilter.crystallize()
-        currentFilter.inputImage = beginImage
-        
-        let amount = sliderAmount
-        let inputKeys = currentFilter.inputKeys
-        
-        //        currentFilter.intensity = -5
-        if inputKeys.contains(kCIInputIntensityKey) {
-            currentFilter.setValue(amount, forKey: kCIInputIntensityKey)
+            
+            ScrollView {
+                ForEach(0..<selectedImage.count, id: \.self) { image in
+                    selectedImage[image]
+                        .resizable()
+                        .scaledToFit()
+                }
+            }
         }
-        
-        if inputKeys.contains(kCIInputRadiusKey) {
-            currentFilter.setValue(amount * 200, forKey: kCIInputRadiusKey)
+        .onChange(of: pickerItems) {
+            Task {
+                
+                selectedImage.removeAll()
+                
+                for item in pickerItems {
+                    if let loadedImages = try await item.loadTransferable(
+                        type: Image.self
+                    ) {
+                        selectedImage.append(loadedImages)
+                    }
+                }
+            }
         }
-        
-        if inputKeys.contains(kCIInputScaleKey) {
-            currentFilter.setValue(amount * 10, forKey: kCIInputScaleKey)
-        }
-        
-        guard let outputImage = currentFilter.outputImage else { return }
-        guard let cgImage = contexts.createCGImage(outputImage, from: outputImage.extent)else {
-            return
-        }
-        let iuImage = UIImage(cgImage: cgImage)
-        image = Image(uiImage: iuImage)
     }
     
 }
