@@ -10,9 +10,9 @@ import SwiftUI
 struct ContentUnavailable: View {
     var body: some View {
         ContentUnavailableView {
-            Label("No snippets", systemImage: "swift")
+            Label("No Picture", systemImage: "photo.badge.plus")
         } description: {
-            Text("You don't have any saved snippets yet.")
+            Text("Tap to import a photo")
         } actions: {
             Button("Create snippet") {
                 
