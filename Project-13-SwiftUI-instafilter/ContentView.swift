@@ -17,13 +17,14 @@ struct ContentView: View {
     @State private var filterIntensity = 0.5
     
     @State private var currentFilter = CIFilter.sepiaTone()
+    
+    // context is expensive to create, it's better to create it once
     let context = CIContext()
     
     var body: some View {
         NavigationStack {
             VStack {
                 Spacer()
-                
                 PhotosPicker(selection: $selectedItem) {
                     if let processedImage {
                         processedImage
@@ -49,10 +50,7 @@ struct ContentView: View {
                 
                 HStack {
                     Button("Change Filter", action: changeFilter)
-                    
                     Spacer()
-                    
-                    
                 }
             }
             .padding([.horizontal, .bottom])
@@ -76,7 +74,6 @@ struct ContentView: View {
             let beginImage = CIImage(image: inputImage)
             currentFilter.setValue(beginImage, forKey: kCIInputImageKey)
             applyProcessing()
-            
         }
     }
     
@@ -91,7 +88,6 @@ struct ContentView: View {
         
         let uiImage = UIImage(cgImage: cgImage)
         processedImage = Image(uiImage: uiImage)
-        
     }
     
 }
