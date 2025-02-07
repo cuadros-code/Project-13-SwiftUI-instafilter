@@ -21,7 +21,7 @@ struct ContentView: View {
     @State private var filterIntensity = 0.5
     @State private var filterRadio = 0.0
     
-    @State private var currentFilter: CIFilter = CIFilter.sepiaTone()
+    @State private var currentFilter: CIFilter = CIFilter.noiseReduction()
     @State private var showingFilter = false
     
     @State private var filterSelected = ""
@@ -108,6 +108,10 @@ struct ContentView: View {
                         Button("Vignette") {
                             filterSelected = "Vignette"
                             setFilter(CIFilter.vignette())
+                        }
+                        Button("Bloom") {
+                            filterSelected = "Bloom"
+                            setFilter(CIFilter.bloom())
                         }
                         Button("Cancel", role: .cancel) { }
                     }
