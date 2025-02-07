@@ -17,13 +17,22 @@ struct ContentView: View {
     @AppStorage("filterCount") var filterCount = 0
     @State private var selectedItem: PhotosPickerItem?
     @State private var processedImage: Image?
+    
     @State private var filterIntensity = 0.5
+    @State private var filterRadio = 0.0
     
     @State private var currentFilter: CIFilter = CIFilter.sepiaTone()
     @State private var showingFilter = false
     
+    @State private var filterSelected = ""
+    
+    @State private var isRadioSliderShowing = false
+    @State private var isIntensitySliderShowing = false
+    
     // context is expensive to create, it's better to create it once
     let context = CIContext()
+    
+    
     
     var body: some View {
         NavigationStack {
@@ -45,28 +54,61 @@ struct ContentView: View {
                 .onChange(of: selectedItem, loadImage)
                 
                 Spacer()
+                if isRadioSliderShowing {
+                    HStack {
+                        Text("Radio")
+                        Slider(value: $filterRadio, in: 0...400)
+                            .disabled((processedImage != nil) ? false : true)
+                            .onChange(of: filterRadio, applyProcessing)
+                    }
+                }
                 
-                HStack {
-                    Text("Intensity")
-                    Slider(value: $filterIntensity)
-                        .onChange(of: filterIntensity, applyProcessing)
+                if isIntensitySliderShowing {
+                    HStack {
+                        Text("Intensity")
+                        Slider(value: $filterIntensity)
+                            .disabled((processedImage != nil) ? false : true)
+                            .onChange(of: filterIntensity, applyProcessing)
+                    }
                 }
                 
                 HStack {
                     Button("Change Filter", action: changeFilter)
+                        .disabled((processedImage != nil) ? false : true)
                     Spacer()
                 }
                 
                 .confirmationDialog(
                     "Select a filter",
                     isPresented: $showingFilter) {
-                        Button("Crystallize") { setFilter(CIFilter.crystallize()) }
-                        Button("Edges") { setFilter(CIFilter.edges()) }
-                        Button("Gaussian Blur") { setFilter(CIFilter.gaussianBlur()) }
-                        Button("Pixellate") { setFilter(CIFilter.pixellate()) }
-                        Button("Sepia Tone") { setFilter(CIFilter.sepiaTone()) }
-                        Button("Unsharp Mask") { setFilter(CIFilter.unsharpMask()) }
-                        Button("Vignette") { setFilter(CIFilter.vignette()) }
+                        Button("Crystallize") {
+                            filterSelected = "Crystallize"
+                            setFilter(CIFilter.crystallize())
+                        }
+                        Button("Edges") {
+                            filterSelected = "Edges"
+                            setFilter(CIFilter.edges())
+                        }
+                        Button("Gaussian Blur") {
+                            filterSelected = "Gaussian Blur"
+                            setFilter(CIFilter.gaussianBlur())
+                        }
+                        Button("Pixellate") {
+                            filterSelected = "Pixellate"
+                            setFilter(CIFilter.pixellate())
+                        }
+                        Button("Sepia Tone") {
+                            filterSelected = "Sepia Tone"
+                            setFilter(CIFilter.sepiaTone())
+                        }
+                        Button("Unsharp Mask") {
+                            filterSelected = "Unsharp Mask"
+                            setFilter(CIFilter.unsharpMask())
+                        }
+                        Button("Vignette") {
+                            filterSelected = "Vignette"
+                            setFilter(CIFilter.vignette())
+                        }
                         Button("Cancel", role: .cancel) { }
                     }
             }
@@ -83,6 +125,9 @@ struct ContentView: View {
                             Label("", systemImage: "square.and.arrow.up")
                         }
                     }
+                }
+                ToolbarItem(placement: .principal) {
+                    Text(filterSelected)
                 }
             }
         }
@@ -120,11 +165,15 @@ struct ContentView: View {
     func applyProcessing() {
         let inputKeys = currentFilter.inputKeys
         
+        hiddenSliders()
+        
         if inputKeys.contains(kCIInputIntensityKey) {
+            isIntensitySliderShowing = true
             currentFilter.setValue(filterIntensity, forKey: kCIInputIntensityKey)
         }
         if inputKeys.contains(kCIInputRadiusKey) {
-            currentFilter.setValue(filterIntensity * 200, forKey: kCIInputRadiusKey)
+            isRadioSliderShowing = true
+            currentFilter.setValue(filterRadio, forKey: kCIInputRadiusKey)
         }
         if inputKeys.contains(kCIInputScaleKey) {
             currentFilter.setValue(filterIntensity * 10, forKey: kCIInputScaleKey)
@@ -138,6 +187,11 @@ struct ContentView: View {
         
         let uiImage = UIImage(cgImage: cgImage)
         processedImage = Image(uiImage: uiImage)
+    }
+    
+    func hiddenSliders() {
+        isRadioSliderShowing = false
+        isIntensitySliderShowing = false
     }
     
 }
